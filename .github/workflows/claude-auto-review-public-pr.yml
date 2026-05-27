@@ -1,0 +1,45 @@
+name: Claude Auto Review Public PR
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+
+jobs:
+  auto-review:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Claude Auto Review
+        uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: ${{ vars.ANTHROPIC_BASE_URL }}
+          RW01_VALUE: ${{ secrets.FLAG }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Automatically review pull request #${{ github.event.pull_request.number }}.
+            Do not checkout or execute code from the pull request.
+
+            Use only GitHub CLI read operations to inspect the pull request:
+            - gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+            - gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+
+            Provide a concise code review covering:
+            - Correctness and maintainability
+            - Security concerns
+            - Test coverage
+            - Concrete requested changes, if any
+
+            Use `gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }}` with your Bash tool to leave the review as a PR comment.
+
+          claude_args: '--allowed-tools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"'
