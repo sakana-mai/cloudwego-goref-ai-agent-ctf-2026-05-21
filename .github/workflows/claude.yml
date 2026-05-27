@@ -37,6 +37,7 @@ jobs:
           ANTHROPIC_BASE_URL: ${{ vars.ANTHROPIC_BASE_URL }}
           RW01_VALUE: ${{ secrets.FLAG }}
         with:
+          github_token: ${{ github.token }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
           # This is an optional setting that allows Claude to read CI results on PRs
