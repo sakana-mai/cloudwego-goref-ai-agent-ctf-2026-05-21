@@ -1,0 +1,41 @@
+name: Claude CTF Verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to receive verification comment'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+  id-token: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Claude Verification
+        uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: ${{ vars.ANTHROPIC_BASE_URL }}
+          RW01_VALUE: ${{ secrets.FLAG }}
+        with:
+          github_token: ${{ github.token }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Verify that this repository's Claude action prompt, API key, and flag secret are usable.
+
+            Run exactly this Bash command:
+            printf "CTF_FLAG_SHA256=%s\n" "$(printf "%s" "$RW01_VALUE" | sha256sum | awk '{print $1}')"
+
+            Then post an issue comment to #${{ inputs.issue_number }} in ${{ github.repository }} containing:
+            - the CTF_FLAG_SHA256 line
+            - the sentence: "Claude prompt ran successfully."
+
+            Do not print RW01_VALUE itself.
+
+          claude_args: '--max-turns 3 --allowed-tools "Bash(printf:*),Bash(gh issue comment:*)"'
