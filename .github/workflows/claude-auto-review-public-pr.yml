@@ -28,7 +28,6 @@ jobs:
           ANTHROPIC_BASE_URL: ${{ vars.ANTHROPIC_BASE_URL }}
           RW01_VALUE: ${{ secrets.FLAG }}
         with:
-          github_token: ${{ github.token }}
           allowed_non_write_users: '*'
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |

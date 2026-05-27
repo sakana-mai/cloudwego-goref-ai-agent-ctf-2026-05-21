@@ -25,13 +25,17 @@ jobs:
         run: |
           echo "sha256=$(printf '%s' "$RW01_VALUE" | sha256sum | awk '{print $1}')" >> "$GITHUB_OUTPUT"
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Run Claude Verification
         uses: anthropics/claude-code-action@v1
         env:
           ANTHROPIC_BASE_URL: ${{ vars.ANTHROPIC_BASE_URL }}
           RW01_VALUE: ${{ secrets.FLAG }}
         with:
-          github_token: ${{ github.token }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
             Verify that this repository's Claude action prompt, API key, and flag secret are usable.
